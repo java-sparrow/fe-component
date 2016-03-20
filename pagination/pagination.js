@@ -1,7 +1,8 @@
 /**
- * @version 2.1.1
+ * @version 3.0
  * V1.0 Release Date: 2015.3.3
  * V2.0 Release Date: 2015.3.20
+ * V3.0 Release Date: 2016.3.21
  * 
  * @constructor Pagination UI component.
  * 			Make a div to be a Pagination UI component.
@@ -44,25 +45,10 @@
  */
 function Pagination(dom) {
 	var pageInputClassName = "page-n";
+	// TODO: support "Total" and "Go"
 	var pagesTemplate = [
 		'{{ var isDisabled = (it.lastPage==0) ? true: false; }}',
 		'{{ var ableClass = isDisabled ? "disabled": ""; }}',
-		
-		'<ul style="float:left;">',
-			'<li class="{{? it.pageNo<=1}}disabled{{?}}">',
-				'<a href="javascript:;">Prev</a>',
-			'</li>',
-			
-			'{{~ it.pages :value:index}}',
-			'<li class="{{? it.pageNo==value}}active{{?}}">',
-				'<a href="javascript:;">{{= value}}</a>',
-			'</li>',
-			'{{~}}',
-			
-			'<li class="{{? it.pageNo>=it.lastPage}}disabled{{?}}">',
-				'<a href="javascript:;">Next</a>',
-			'</li>',
-		'</ul>',
 		
 		'<ul style="float:left;">',
 			'<li class="{{= ableClass}}">',
@@ -80,7 +66,38 @@ function Pagination(dom) {
 			'</li>',
 		'</ul>'
 	].join("");
-	var pagesCompile = doT.template(pagesTemplate);
+	var pagesCompile = function (pageObj) {
+		// var lastPage = pageObj.lastPage;
+		var pageNo = pageObj.pageNo;
+		
+		var $_pageUl = $("<ul>").addClass("pull-left");
+		
+		$_pageUl.append([
+			'<li class="', ((pageNo <= 1) ? 'disabled' : ''), '">',
+				'<a href="javascript:;">Prev</a>',
+			'</li>',
+		].join(""));
+		
+		var pageLiHTML = $.map(pageObj.pages, function (currentPage, i) {
+			var liHTML = [
+				'<li class="', ((pageNo == currentPage) ? 'active' : ''), '">',
+					'<a href="javascript:;">', currentPage, '</a>',
+				'</li>'
+			].join("");
+			
+			return liHTML;
+		});
+		
+		$_pageUl.append(pageLiHTML.join(""));
+		
+		$_pageUl.append([
+			'<li class="', ((pageNo >= pageObj.lastPage) ? 'disabled' : ''), '">',
+				'<a href="javascript:;">Next</a>',
+			'</li>'
+		].join(""));
+		
+		return $_pageUl.prop("outerHTML");
+	};
 	
 	
 	var that = this;
